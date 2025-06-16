@@ -19,8 +19,9 @@ def calculate_compound_interest(principal, annual_rate, compounding_frequency, y
     # Hitung total tahun
     t = years
 
-    # Rumus bunga majemuk: A = P (1 + r/n)^(nt)
-    amount = principal * (1 + r / n)(n * t)
+    # Rumus bunga majemuk: A = P * (1 + r/n)^(n*t)
+    # Perbaikan: Menggunakan ** untuk pangkat
+    amount = principal * (1 + r / n)**(n * t)
     interest_earned = amount - principal
     return amount, interest_earned
 
@@ -85,7 +86,7 @@ def main():
 
     if st.button("Hitung Bunga Majemuk"):
         with st.spinner("Menghitung potensi pertumbuhan uang Anda..."):
-            time.sleep(2) # Simulasi loading
+            time.sleep(1) # Mengurangi waktu sleep agar tidak terlalu lama saat testing
 
         final_amount, interest_earned = calculate_compound_interest(
             principal, annual_rate, compounding_frequency, years
@@ -99,6 +100,7 @@ def main():
         st.success(f"Jumlah Akhir Setelah {years} Tahun: *Rp {final_amount:,.0f}*")
         st.success(f"Total Bunga yang Diperoleh: *Rp {interest_earned:,.0f}*")
 
+        st.markdown("---") # Perbaikan: Menambahkan st.markdown("") untuk garis pemisah
         st.subheader("Visualisasi Pertumbuhan (Animasi Sederhana)")
 
         # Placeholder untuk animasi
@@ -108,37 +110,37 @@ def main():
         # Note: Ini adalah simulasi visual, bukan perhitungan tahunan yang presisi dari rumus bunga majemuk.
         # Tujuannya untuk menunjukkan progres pertumbuhan.
         current_display_amount = float(principal)
+        progress_bar = st.progress(0) # Menambahkan progress bar untuk visualisasi yang lebih baik
+
         for year_num in range(1, years + 1):
             # Perkiraan pertumbuhan untuk visualisasi
             # Asumsi bunga ditambahkan setiap tahun untuk tujuan visual
-            estimated_growth_this_year = current_display_amount * (annual_rate / 100)
-            current_display_amount += estimated_growth_this_year
+            # Menggunakan bunga majemuk sederhana per tahun untuk visualisasi
+            current_display_amount *= (1 + (annual_rate / 100))
 
             # Tentukan emoji berdasarkan pertumbuhan
-            if estimated_growth_this_year > 0:
-                growth_emoji = '📈' * (min(5, int(estimated_growth_this_year / (principal * 0.01))) + 1) # Min 1, Max 5 emoji
-            else:
-                growth_emoji = ''
+            # Kriteria emoji yang lebih realistis dan tidak terlalu banyak
+            growth_emoji = '📈'
+            if year_num % 5 == 0: # Tambahkan emoji ekstra setiap 5 tahun
+                growth_emoji += '✨'
+
+            # Update progress bar
+            progress_bar.progress(int((year_num / years) * 100))
 
             # Batasi tampilan agar tidak terlalu cepat jika jangka waktu panjang
-            if years <= 20 or year_num % 5 == 0 or year_num == years: # Tampilkan setiap tahun jika <20, atau setiap 5 tahun, atau tahun terakhir
+            # Tampilkan setiap tahun jika <10 tahun, atau setiap 2 tahun, atau tahun terakhir
+            if years <= 10 or year_num % 2 == 0 or year_num == years:
                 animation_placeholder.markdown(
                     f"<h3 style='text-align: center;'>Tahun {year_num}: Rp {current_display_amount:,.0f} {growth_emoji}</h3>",
                     unsafe_allow_html=True
                 )
-                time.sleep(0.2 if years < 10 else 0.05) # Atur kecepatan animasi
+                time.sleep(0.1) # Atur kecepatan animasi
             
-            if year_num == years:
-                animation_placeholder.markdown(
-                    f"<h2 style='text-align: center;'>🎉 Investasi Bertumbuh! 🎉</h2>",
-                    unsafe_allow_html=True
-                )
-                time.sleep(1)
-                animation_placeholder.empty()
-
-
+        # Setelah loop selesai, kosongkan placeholder animasi dan tampilkan pesan akhir
+        animation_placeholder.empty()
         st.success("Perhitungan dan visualisasi selesai! Selamat merencanakan keuangan Anda! ✨")
-
+        
+        st.markdown("---") # Garis pemisah setelah animasi
 
         st.subheader("Mengapa Bunga Majemuk Itu Penting?")
         st.markdown("""
@@ -148,5 +150,5 @@ def main():
         """)
 
 
-if _name_ == "_main_":
+if __name__ == "__main__": # Perbaikan: __name__
     main()
